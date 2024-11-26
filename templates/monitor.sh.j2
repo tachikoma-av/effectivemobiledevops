@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if pgrep -x "test" > /dev/null; then
+    curl -s https://test.com/monitoring/test/api || echo "$(date) - Monitoring server unavailable" >> /var/log/monitoring.log
+else
+    echo "$(date) - test process not running, restarting..." >> /var/log/monitoring.log
+    systemctl restart test.service  # Replace 'test.service' with your actual service name
+fi

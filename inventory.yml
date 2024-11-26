@@ -1,0 +1,4 @@
+all:
+  hosts:
+    172.23.189.179:
+      ansible_user: ansible

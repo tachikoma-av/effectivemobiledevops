@@ -1,0 +1,29 @@
+- name: Setup monitoring for process test
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Copy monitoring script
+      template:
+        src: templates/monitor.sh.j2
+        dest: /usr/local/bin/monitor.sh
+        mode: '0755'
+
+    - name: Copy monitoring service
+      template:
+        src: templates/monitoring.service.j2
+        dest: /etc/systemd/system/monitoring.service
+
+    - name: Copy monitoring timer
+      template:
+        src: templates/monitoring.timer.j2
+        dest: /etc/systemd/system/monitoring.timer
+
+    - name: Reload systemd
+      command: systemctl daemon-reload
+
+    - name: Enable and start timer
+      systemd:
+        name: monitoring.timer
+        enabled: yes
+        state: started
