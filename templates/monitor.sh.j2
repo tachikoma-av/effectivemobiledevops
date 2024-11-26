@@ -1,8 +1,22 @@
 #!/bin/bash
 
-if pgrep -x "test" > /dev/null; then
-    curl -s https://test.com/monitoring/test/api || echo "$(date) - Monitoring server unavailable" >> /var/log/monitoring.log
+PROCESS_NAME="test"
+MONITOR_URL="https://test.com/monitoring/test/api"
+LOG_FILE="/var/log/monitoring.log"
+
+# Check if the process is running
+if pgrep -x "$PROCESS_NAME" > /dev/null; then
+    # If process is running, check if monitoring server is available
+    if curl -s --head --request GET "$MONITOR_URL" | grep "200 OK" > /dev/null; then
+        echo "$(date): Process $PROCESS_NAME is running, monitoring server is available." >> "$LOG_FILE"
+    else
+        echo "$(date): Process $PROCESS_NAME is running, but the monitoring server is unavailable." >> "$LOG_FILE"
+    fi
 else
-    echo "$(date) - test process not running, restarting..." >> /var/log/monitoring.log
-    systemctl restart test.service  # Replace 'test.service' with your actual service name
+    # If process is not running, try to restart it
+    if systemctl restart "$PROCESS_NAME"; then
+        echo "$(date): Process $PROCESS_NAME has been restarted." >> "$LOG_FILE"
+    else
+        echo "$(date): Failed to restart process $PROCESS_NAME." >> "$LOG_FILE"
+    fi
 fi
